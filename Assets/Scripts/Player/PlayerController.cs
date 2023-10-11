@@ -13,10 +13,16 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed;
     public float jumpForce;
     private Vector2 _curMovementInput;
+    private float _originMoveSpeed;
+    private bool _isCrouch = false;
 
     [Header("Look")]
     [SerializeField] private CinemachineVirtualCamera _virtualCamera;
     private CinemachinePOV _pov;
+
+    [Header("Audoi")]
+    [SerializeField] private AudioSource _jumpAudioSource;
+
 
     private Coroutine _fireCoroutine;
     private bool _IsFiring = false;
@@ -25,6 +31,7 @@ public class PlayerController : MonoBehaviour
     {
         _player = GetComponent<Player>();
         _pov = _virtualCamera.GetCinemachineComponent<CinemachinePOV>();
+        _originMoveSpeed = moveSpeed;
     }
 
     private void Update()
@@ -74,12 +81,32 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void OnCrouch(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            _isCrouch = !_isCrouch;
+            if (_isCrouch)
+            {
+                _player.Animator.SetBool("Crouch", true);
+                moveSpeed *= 0.5f;
+            }
+            else
+            {
+                _player.Animator.SetBool("Crouch", false);
+                moveSpeed = _originMoveSpeed;
+            }
+        }
+    }
+
     public void OnJumpInput(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Started)
         {
             if (_player.Controller.isGrounded)
             {
+                if(!_isCrouch)
+                    _jumpAudioSource.Play();
                 _player.Animator.SetTrigger("Jump");
                 _player.ForceReceiver.Jump(jumpForce);
             }
@@ -90,7 +117,6 @@ public class PlayerController : MonoBehaviour
     {
         if (context.phase == InputActionPhase.Started)
         {
-            //_player.Weapon.Fire();
             _IsFiring = true;
             _fireCoroutine = StartCoroutine(FireCO());
         }
