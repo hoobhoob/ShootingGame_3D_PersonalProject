@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private CinemachineVirtualCamera _virtualCamera;
     private CinemachinePOV _pov;
 
+    private Coroutine _fireCoroutine;
+    private bool _IsFiring = false;
 
     private void Awake()
     {
@@ -76,11 +78,10 @@ public class PlayerController : MonoBehaviour
     {
         if (context.phase == InputActionPhase.Started)
         {
-            Debug.Log("OnJump");
             if (_player.Controller.isGrounded)
             {
+                _player.Animator.SetTrigger("Jump");
                 _player.ForceReceiver.Jump(jumpForce);
-                Debug.Log("isGrounded : OnJump");
             }
         }
     }
@@ -89,7 +90,23 @@ public class PlayerController : MonoBehaviour
     {
         if (context.phase == InputActionPhase.Started)
         {
+            //_player.Weapon.Fire();
+            _IsFiring = true;
+            _fireCoroutine = StartCoroutine(FireCO());
+        }
+        else if (context.phase == InputActionPhase.Canceled)
+        {
+            _IsFiring = false;
+            StopCoroutine(_fireCoroutine);
+        }
+    }
+
+    IEnumerator FireCO()
+    {
+        while (_IsFiring)
+        {
             _player.Weapon.Fire();
+            yield return new WaitForSeconds(0.1f);
         }
     }
 }
