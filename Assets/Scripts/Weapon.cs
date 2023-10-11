@@ -30,13 +30,15 @@ public class Weapon : MonoBehaviour
         _audioSource.Play();
 
         CurBulletCount += -1;
-        Debug.Log("Weapon Fire!");
         GameObject bulletObj = _bulletPool.SpawnFromPool("Bullet");
         bulletObj.SetActive(true);
         Vector3 bulletposition = _bulletSpawnTransform.transform.position;
         Vector3 forward = _bulletSpawnTransform.transform.forward;
         bulletposition += 3.5f * forward;
         bulletObj.transform.position = bulletposition;
+        bulletObj.transform.rotation = Quaternion.LookRotation(forward);
+        //bulletObj.GetComponent<Bullet>().Shoot();
+        bulletObj.GetComponent<Bullet>().Shoot(forward);
     }
 
     public bool IsEmpty()
