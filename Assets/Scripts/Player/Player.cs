@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     public Rigidbody Rigidbody { get; private set; }
     public Animator Animator { get; private set; }
     public CharacterController Controller { get; private set; }
+    public ForceReceiver ForceReceiver { get; private set; }
     public Health Health { get; private set; }
     [field: SerializeField] public Weapon Weapon { get; private set; }
 
@@ -16,6 +17,7 @@ public class Player : MonoBehaviour
         Rigidbody = GetComponent<Rigidbody>();
         Animator = GetComponentInChildren<Animator>();
         Controller = GetComponent<CharacterController>();
+        ForceReceiver = GetComponent<ForceReceiver>();
         Health = GetComponent<Health>();
     }
 

@@ -9,70 +9,44 @@ public class PlayerController : MonoBehaviour
     private Player _player;
 
     [Header("Movement")]
+    [SerializeField] private GameObject _playerObj;
     public float moveSpeed;
-    private Vector2 curMovementInput;
     public float jumpForce;
-    //public LayerMask groundLayerMask;
+    private Vector2 _curMovementInput;
 
     [Header("Look")]
-    public Transform cameraContainer;
-    public CinemachineVirtualCamera virtualCamera;
-    public CinemachinePOV pov;
-    public float minXlook;
-    public float maxXlook;
-    private float camCurXRot;
-    public float lookSensitivity;
-
-    private Vector2 mouseDelta;
-
-    [HideInInspector]
-    public bool canLook = true;
+    [SerializeField] private CinemachineVirtualCamera _virtualCamera;
+    private CinemachinePOV _pov;
 
 
     private void Awake()
     {
         _player = GetComponent<Player>();
-        pov = virtualCamera.GetCinemachineComponent<CinemachinePOV>();
+        _pov = _virtualCamera.GetCinemachineComponent<CinemachinePOV>();
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         Move();
     }
 
-    private void LateUpdate()
-    {
-        if (canLook)
-        {
-            CameraLook();
-        }
-    }
-
     private void Move()
     {
-        _player.Controller.Move(GetMovementDirection(curMovementInput) * moveSpeed * Time.deltaTime);
-    }
+        Vector3 dir = GetMovementDirection(_curMovementInput);
+        _player.Controller.Move((dir * moveSpeed + _player.ForceReceiver.Movement) * Time.deltaTime);
 
-    void CameraLook()
-    {
-        camCurXRot += mouseDelta.y * lookSensitivity;
-        camCurXRot = Mathf.Clamp(camCurXRot, minXlook, maxXlook);
-        cameraContainer.localEulerAngles = new Vector3(-camCurXRot, 0, 0);
-
-        transform.eulerAngles += new Vector3(0, mouseDelta.x * lookSensitivity, 0);
     }
 
     private Vector3 GetMovementDirection(Vector2 movementInput)
     {
-        float verticalAxis = pov.m_VerticalAxis.Value;
-        float horizontalAxis = pov.m_HorizontalAxis.Value;
-        var quanternion = Quaternion.Euler(verticalAxis, horizontalAxis, 0);
+        float verticalAxis = _pov.m_VerticalAxis.Value;
+        float horizontalAxis = _pov.m_HorizontalAxis.Value;
+        Quaternion quanternion = Quaternion.Euler(verticalAxis, horizontalAxis, 0);
 
-        Vector3 forward = quanternion * virtualCamera.LookAt.forward;
-        Vector3 right = quanternion * virtualCamera.LookAt.right;
+        _playerObj.transform.rotation = Quaternion.Euler(0, _pov.m_HorizontalAxis.Value + 45, 0);
 
-        Debug.Log("현재 forward : " + forward);
-        Debug.Log("현재 right : " + right);
+        Vector3 forward = quanternion * _virtualCamera.LookAt.forward;
+        Vector3 right = quanternion * _virtualCamera.LookAt.right;
 
         forward.y = 0;
         right.y = 0;
@@ -83,21 +57,31 @@ public class PlayerController : MonoBehaviour
         return forward * movementInput.y + right * movementInput.x;
     }
 
-    public void OnLookInput(InputAction.CallbackContext context)
+    private Vector3 GetForwardDirection()
     {
-        mouseDelta = context.ReadValue<Vector2>();
+        float verticalAxis = _pov.m_VerticalAxis.Value;
+        float horizontalAxis = _pov.m_HorizontalAxis.Value;
+        Quaternion quanternion = Quaternion.Euler(verticalAxis, horizontalAxis, 0);
+
+        Vector3 right = quanternion * _virtualCamera.LookAt.right;
+        right.y = 0;
+        right.Normalize();
+
+        return right;
     }
 
     public void OnMoveInput(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Performed)
         {
-            curMovementInput = context.ReadValue<Vector2>();
+            _player.Animator.SetBool("@Run", true);
+            _curMovementInput = context.ReadValue<Vector2>();
 
         }
         else if (context.phase == InputActionPhase.Canceled)
         {
-            curMovementInput = Vector2.zero;
+            _player.Animator.SetBool("@Run", false);
+            _curMovementInput = Vector2.zero;
         }
     }
 
@@ -105,45 +89,13 @@ public class PlayerController : MonoBehaviour
     {
         if (context.phase == InputActionPhase.Started)
         {
+            Debug.Log("OnJump");
             if (_player.Controller.isGrounded)
-                _player.Controller.Move(Vector2.up * jumpForce * Time.deltaTime);
-            //_rigidbody.AddForce(Vector2.up * jumpForce, ForceMode.Impulse);
+            {
+                _player.ForceReceiver.Jump(jumpForce);
+                Debug.Log("isGrounded : OnJump");
+            }
         }
     }
 
-    //private bool IsGrounded()
-    //{
-    //    Ray[] rays = new Ray[4]
-    //    {
-    //        new Ray(transform.position + (transform.forward * 0.2f) + (Vector3.up * 0.01f), Vector3.down),
-    //        new Ray(transform.position + (-transform.forward * 0.2f) + (Vector3.up * 0.01f), Vector3.down),
-    //        new Ray(transform.position + (transform.right * 0.2f) + (Vector3.up * 0.01f), Vector3.down),
-    //        new Ray(transform.position + (-transform.right * 0.2f) + (Vector3.up * 0.01f), Vector3.down),
-    //    };
-
-    //    for (int i = 0; i < rays.Length; i++)
-    //    {
-    //        if (Physics.Raycast(rays[i], 0.1f, groundLayerMask))
-    //        {
-    //            return true;
-    //        }
-    //    }
-
-    //    return false;
-    //}
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawRay(transform.position + (transform.forward * 0.2f), Vector3.down);
-        Gizmos.DrawRay(transform.position + (-transform.forward * 0.2f), Vector3.down);
-        Gizmos.DrawRay(transform.position + (transform.right * 0.2f), Vector3.down);
-        Gizmos.DrawRay(transform.position + (-transform.right * 0.2f), Vector3.down);
-    }
-
-    public void ToggleCursor(bool toggle)
-    {
-        Cursor.lockState = toggle ? CursorLockMode.None : CursorLockMode.Locked;
-        canLook = !toggle;
-    }
 }
