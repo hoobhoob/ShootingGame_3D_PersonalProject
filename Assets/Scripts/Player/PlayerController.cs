@@ -57,30 +57,17 @@ public class PlayerController : MonoBehaviour
         return forward * movementInput.y + right * movementInput.x;
     }
 
-    private Vector3 GetForwardDirection()
-    {
-        float verticalAxis = _pov.m_VerticalAxis.Value;
-        float horizontalAxis = _pov.m_HorizontalAxis.Value;
-        Quaternion quanternion = Quaternion.Euler(verticalAxis, horizontalAxis, 0);
-
-        Vector3 right = quanternion * _virtualCamera.LookAt.right;
-        right.y = 0;
-        right.Normalize();
-
-        return right;
-    }
-
     public void OnMoveInput(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Performed)
         {
-            _player.Animator.SetBool("@Run", true);
+            _player.Animator.SetBool("Run", true);
             _curMovementInput = context.ReadValue<Vector2>();
 
         }
         else if (context.phase == InputActionPhase.Canceled)
         {
-            _player.Animator.SetBool("@Run", false);
+            _player.Animator.SetBool("Run", false);
             _curMovementInput = Vector2.zero;
         }
     }
@@ -98,4 +85,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void OnFire(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            _player.Weapon.Fire();
+        }
+    }
 }

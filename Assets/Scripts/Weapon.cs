@@ -4,15 +4,22 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private AudioSource _audioSource;
+    [SerializeField] private AudioClip _clip;
+    [SerializeField] private ParticleSystem _particleSystem;
+
+    private void Awake()
     {
-        
+        _audioSource = GetComponent<AudioSource>();
+        _audioSource.clip = _clip;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Fire()
     {
-        
+        _particleSystem.Stop();
+        _particleSystem.Play();
+        _audioSource.Stop();
+        _audioSource.Play();
+        Debug.Log("Weapon Fire!");
     }
 }
