@@ -5,6 +5,7 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     [SerializeField] private GameObject _bulletObj;
+    private int bulletDamage = 30;
     private float bulletSpeed = 60000f;
     private Coroutine _shootCO;
     private Rigidbody _rigidbody;
@@ -27,22 +28,25 @@ public class Bullet : MonoBehaviour
         while (true)
         {
             _rigidbody.AddForce(_moveDir * bulletSpeed * Time.deltaTime);
-            //_rigidbody.velocity = _moveDir * Time.deltaTime;
-            //_bulletObj.transform.position += _moveDir * bulletSpeed * Time.deltaTime;
-            //Debug.Log($"Plus : {_moveDir * bulletSpeed * Time.deltaTime}");
-            //Debug.Log($"bullet position : {_bulletObj.transform.position}");
             yield return null;
         }
     }
 
     public void OnTriggerEnter(Collider col)
     {
-        if(col.tag == "Ground")
-        {
-            Debug.Log("Bullet Hit");
-            StopCoroutine(_shootCO);
-            gameObject.SetActive(false);
-        }
+        //if (col.tag == "Player" || col.tag == "Enemy")
+        //{
+        //    if(col.gameObject.TryGetComponent<Health>(out Health health))
+        //        health.TakeDamage(bulletDamage);
+        //}
+        if (col.gameObject.TryGetComponent<Health>(out Health health))
+            health.TakeDamage(bulletDamage);
+
+        Debug.Log("Bullet Hit");
+        StopCoroutine(_shootCO);
+        gameObject.SetActive(false);
+
+        
     }
 
     private void ResetVelocity()
