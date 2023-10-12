@@ -5,7 +5,7 @@
 1. 게임 설명
 2. 사용한 기능
 3. 플레이 화면
-
+4. 문제점 및 해결
 ---
 
 # 1. 게임 설명
@@ -40,3 +40,13 @@
 # 3. 플레이 화면
 
 **🔽 메인 화면**
+
+![MainScene01](/Screenshots/MainScene1.png)
+---
+
+# 4. 문제점 및 해결
+
+## 1. Cinemachine
+- Cinemachine의 Virtual Camera는 별도의 Input Setting 없이 Aim을 POV 로 하면 마우스 움직임으로 카메라를 움직일 수 있다.
+- 문제점 : 카메라를 움직일 때 플레이어도 같이 회전할 수 있게 방향을 알아야 하는데 Virtual Camera 의 Transform 방향은 그대로다.
+- 해결 : 
