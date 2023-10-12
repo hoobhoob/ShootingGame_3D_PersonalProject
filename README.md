@@ -41,7 +41,7 @@
 
 **🔽 메인 화면**
 
-![MainScene01](/Screenshots/MainScene1.png)
+![MainScene01](/Screenshots/MainScene01.png)
 ---
 
 # 4. 문제점 및 해결
