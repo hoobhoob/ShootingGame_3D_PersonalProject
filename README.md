@@ -48,7 +48,7 @@
 
 총알 발사 이펙트
 
-![BulletEffect01](/Screenshots/BulletEffect01.Png)
+![BulletEffect01](/Screenshots/BulletEffect01.png)
 ---
 
 # 4. 문제점 및 해결
